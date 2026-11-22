@@ -3,9 +3,9 @@ set -e
 
 cd "$(dirname "$0")"
 
-DOMAIN="estorebackend.amptechnology.in"
+DOMAIN="backend.agreement.amptechnology.in"
 EMAIL="devs.amptechnology@gmail.com"
-CONTAINER="estore-app"
+CONTAINER="agreement-app"
 APP_PORT="8090"
 CERT_PATH="/root/amp_portal_backend/certbot/conf/live/$DOMAIN/fullchain.pem"
 NGINX_CONF="/root/amp_portal_backend/nginx/conf.d/$DOMAIN.conf"

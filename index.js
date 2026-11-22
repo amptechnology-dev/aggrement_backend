@@ -48,9 +48,23 @@ app.set("views", path.join(__dirname, "src", "views"));
 
 const authRoutes = require("./src/routes/auth.routes.js");
 const superAdminRoutes = require("./src/routes/superAdmin.routes.js");
+const propertyRoutes = require("./src/routes/property.routes.js");
+const stallRoutes = require("./src/routes/stall.routes.js");
+const tenantRoutes = require("./src/routes/tenant.routes.js");
+const settingsRoutes = require("./src/routes/settings.routes.js");
+const agreementRoutes = require("./src/routes/agreement.routes.js");
+const handoverRoutes = require("./src/routes/handover.routes.js");
+const tenantPortalRoutes = require("./src/routes/tenantPortal.routes.js");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/super-admin", superAdminRoutes);
+app.use("/api/properties", propertyRoutes);
+app.use("/api/stalls", stallRoutes);
+app.use("/api/tenants", tenantRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/agreements", agreementRoutes);
+app.use("/api/handovers", handoverRoutes);
+app.use("/api/tenant-portal", tenantPortalRoutes);
 
 const port = process.env.PORT || 8090;
 

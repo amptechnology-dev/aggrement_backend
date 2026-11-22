@@ -1,7 +1,7 @@
 services:
   app:
-    container_name: estore-app
-    image: ghcr.io/amptechnology-dev/store_product_backend:latest
+    container_name: agreement-app
+    image: ghcr.io/amptechnology-dev/aggrement_backend:latest
     env_file:
       - .env
     environment:

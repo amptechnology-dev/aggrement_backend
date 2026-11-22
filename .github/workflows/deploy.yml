@@ -1,4 +1,4 @@
-name: Deploy Estore Backend
+name: Deploy Agreement Backend
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 
 concurrency:
-  group: deploy-estore-backend
+  group: deploy-agreement-backend
   cancel-in-progress: false
 
 env:
@@ -59,10 +59,10 @@ jobs:
           command_timeout: 10m
           script: |
             set -e
-            cd /root/estore_backend
+            cd /root/agreement_backend
             git pull --ff-only origin master
             docker compose pull
             docker compose up -d --remove-orphans
             docker image prune -f
             sleep 10
-            curl -sf https://estorebackend.amptechnology.in/api/category > /dev/null && echo "health check OK"
+            curl -sf https://backend.agreement.amptechnology.in/.well-known/assetlinks.json > /dev/null && echo "health check OK"
