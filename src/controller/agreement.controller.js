@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { randomBytes } = require("node:crypto");
 const AgreementModel = require("../model/agreement.model.js");
 const TenantModel = require("../model/tenant.model.js");
 const StallModel = require("../model/stall.model.js");
@@ -14,6 +15,9 @@ const {
   toIso,
 } = require("../helper/rentSchedule.js");
 const sendError = require("../helper/sendError.js");
+const { uploadToR2 } = require("../helper/upload.js");
+const { generateAgreementPdf } = require("../helper/agreementPdf.js");
+const { sendAgreementEmail } = require("../helper/sendOtpEmail.js");
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -71,6 +75,7 @@ const toDto = (a, withSchedule = false) => {
       a.ownerId && a.ownerId._id
         ? { id: a.ownerId._id, name: a.ownerId.name, phone: a.ownerId.phone }
         : null,
+    pdfUrl: a.pdfUrl ?? null,
     createdAt: a.createdAt,
   };
 };
@@ -125,6 +130,26 @@ const saveNewTerms = async (ownerId, savedTerms, terms) => {
     );
   }
   return fresh.length;
+};
+
+// PDF বানিয়ে R2-তে তোলে ও agreement-এ url save করে। fail করলে null (agreement create আটকাবে না)
+const buildAndStorePdf = async (agreementId, dto) => {
+  try {
+    const buffer = await generateAgreementPdf(dto);
+    const safeNo = dto.agreementNo.replace(/[^a-zA-Z0-9-]/g, "_");
+    // random suffix: url অনুমান করা যাবে না
+    const key = `agreement-system/agreements/${safeNo}-${randomBytes(8).toString("hex")}.pdf`;
+    const pdfUrl = await uploadToR2(buffer, key, "application/pdf");
+
+    await AgreementModel.updateOne(
+      { _id: agreementId },
+      { $set: { pdfUrl, pdfGeneratedAt: new Date() } },
+    );
+    return { pdfUrl, buffer };
+  } catch (e) {
+    console.error("Agreement PDF error:", e);
+    return null;
+  }
 };
 
 /**
@@ -231,11 +256,24 @@ const createAgreement = async (req, res) => {
       console.error("Save terms error:", e);
     }
 
+    const dto = toDto(created.toObject(), true);
+    const pdf = await buildAndStorePdf(created._id, dto);
+
+    if (pdf) {
+      dto.pdfUrl = pdf.pdfUrl;
+      // email-এর জন্য response আটকে রাখার দরকার নেই
+      sendAgreementEmail(tenant, dto, pdf.buffer).catch((e) =>
+        console.error("Agreement email error:", e),
+      );
+    }
+
     return res.status(201).json({
       success: true,
-      message: "Agreement created successfully",
+      message: pdf
+        ? "Agreement created successfully"
+        : "Agreement created, but the PDF could not be generated",
       newTermsSaved,
-      agreement: toDto(created.toObject(), true),
+      agreement: dto,
     });
   } catch (error) {
     // agreement না হলে stall আবার খালি করে দাও

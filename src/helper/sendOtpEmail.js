@@ -23,4 +23,22 @@ const sendWelcomeEmail = async (user, roleLabel) => {
   });
 };
 
-module.exports = { sendOtpEmail, sendWelcomeEmail };
+const sendAgreementEmail = async (tenant, agreement, pdfBuffer) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+    to: tenant.email,
+    subject: `Your agreement ${agreement.agreementNo} - Agreement Management System`,
+    html: `<p>Dear ${tenant.name},</p>
+           <p>Your agreement <b>${agreement.agreementNo}</b> for Stall ${agreement.stall.stallNo}, ${agreement.stall.propertyName} has been created.</p>
+           <p>Please find the agreement PDF attached. You can also view it after logging in.</p>`,
+    attachments: [
+      {
+        filename: `${agreement.agreementNo}.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  });
+};
+
+module.exports = { sendOtpEmail, sendWelcomeEmail, sendAgreementEmail };

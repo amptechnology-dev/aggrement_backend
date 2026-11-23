@@ -10,7 +10,12 @@ const agreementSchema = new mongoose.Schema(
     tenantId: { type: ObjectId, ref: "Tenant", required: true, index: true },
     tenantUserId: { type: ObjectId, ref: "User", required: true, index: true },
     stallId: { type: ObjectId, ref: "Stall", required: true },
-    propertyId: { type: ObjectId, ref: "Property", required: true, index: true },
+    propertyId: {
+      type: ObjectId,
+      ref: "Property",
+      required: true,
+      index: true,
+    },
 
     agreementDate: { type: Date, required: true },
     effectiveFrom: { type: Date, required: true },
@@ -26,7 +31,11 @@ const agreementSchema = new mongoose.Schema(
       email: { type: String, required: true },
       phone: { type: String, required: true },
       guardianName: { type: String, required: true },
-      guardianRelation: { type: String, enum: ["FATHER", "HUSBAND"], required: true },
+      guardianRelation: {
+        type: String,
+        enum: ["FATHER", "HUSBAND"],
+        required: true,
+      },
       voterCardNo: { type: String, required: true },
       address: { type: String, required: true },
     },
@@ -57,6 +66,8 @@ const agreementSchema = new mongoose.Schema(
     terminatedAt: { type: Date },
     terminationReason: { type: String, trim: true },
     terminatedBy: { type: ObjectId, ref: "User" },
+    pdfUrl: { type: String },
+    pdfGeneratedAt: { type: Date },
   },
   { timestamps: true },
 );
